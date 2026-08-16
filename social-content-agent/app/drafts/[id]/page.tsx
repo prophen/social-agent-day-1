@@ -303,64 +303,75 @@ export default function DraftEditorPage() {
           value={content}
           onChange={(event) => handleContentChange(event.target.value)}
           rows={16}
+          readOnly={draft.status === "published"}
         />
+        {draft.status === "published" && (
+          <section className="approval-note">
+            <h2>Published record</h2>
+            <p>
+              This is a simulated publication record. Published drafts are
+              read-only in this version of the app.
+            </p>
+          </section>
+        )}
+        {draft.status !== "published" && (
+          <div className="editor-actions">
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={saveChanges}
+              disabled={isSaving}
+            >
+              {isSaving ? "Saving..." : "Save changes"}
+            </button>
 
-        <div className="editor-actions">
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={saveChanges}
-            disabled={isSaving}
-          >
-            {isSaving ? "Saving..." : "Save changes"}
-          </button>
+            <button
+              type="button"
+              className="approve-button"
+              onClick={approveDraft}
+              disabled={isApproving || draft.status === "approved"}
+            >
+              {draft.status === "approved"
+                ? "Approved"
+                : isApproving
+                  ? "Approving..."
+                  : "Approve draft"}
+            </button>
 
-          <button
-            type="button"
-            className="approve-button"
-            onClick={approveDraft}
-            disabled={isApproving || draft.status === "approved"}
-          >
-            {draft.status === "approved"
-              ? "Approved"
-              : isApproving
-                ? "Approving..."
-                : "Approve draft"}
-          </button>
-          {draft.status === "approved" && (
-            <section className="schedule-panel">
-              <h2>Schedule simulated publication</h2>
+            {draft.status === "approved" && (
+              <section className="schedule-panel">
+                <h2>Schedule simulated publication</h2>
 
-              <label htmlFor="scheduled-for">Publish date and time</label>
+                <label htmlFor="scheduled-for">Publish date and time</label>
 
-              <input
-                id="scheduled-for"
-                type="datetime-local"
-                value={scheduledFor}
-                onChange={(event) => setScheduledFor(event.target.value)}
-              />
+                <input
+                  id="scheduled-for"
+                  type="datetime-local"
+                  value={scheduledFor}
+                  onChange={(event) => setScheduledFor(event.target.value)}
+                />
 
-              <button
-                type="button"
-                className="schedule-button"
-                onClick={scheduleDraft}
-                disabled={isScheduling}
-              >
-                {isScheduling ? "Scheduling..." : "Schedule post"}
-              </button>
-            </section>
-          )}
-          {draft.status === "scheduled" && draft.scheduledFor && (
-            <section className="schedule-panel">
-              <h2>Scheduled</h2>
-              <p>
-                Simulated publication is scheduled for{" "}
-                {formatDate(draft.scheduledFor)}.
-              </p>
-            </section>
-          )}
-        </div>
-
+                <button
+                  type="button"
+                  className="schedule-button"
+                  onClick={scheduleDraft}
+                  disabled={isScheduling}
+                >
+                  {isScheduling ? "Scheduling..." : "Schedule post"}
+                </button>
+              </section>
+            )}
+            {draft.status === "scheduled" && draft.scheduledFor && (
+              <section className="schedule-panel">
+                <h2>Scheduled</h2>
+                <p>
+                  Simulated publication is scheduled for{" "}
+                  {formatDate(draft.scheduledFor)}.
+                </p>
+              </section>
+            )}
+          </div>
+        )}
         {message && (
           <p
             className={

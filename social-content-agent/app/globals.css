@@ -406,3 +406,12 @@ button:disabled {
 .schedule-button:hover:not(:disabled) {
   background: #17488f;
 }
+.status-scheduled {
+  color: #154b9d;
+  background: #dce9ff;
+}
+
+.status-published {
+  color: #5b2377;
+  background: #f0defa;
+}

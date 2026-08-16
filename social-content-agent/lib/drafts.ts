@@ -193,3 +193,40 @@ export async function updateDraft(
 
   return toDraft(data as DraftRow);
 }
+export async function publishDueDrafts(): Promise<Draft[]> {
+  const now = new Date().toISOString();
+
+  const { data: dueRows, error: findError } = await supabase
+    .from("drafts")
+    .select("*")
+    .eq("status", "scheduled")
+    .lte("scheduled_for", now);
+
+  if (findError) {
+    throw new Error(`Could not find due drafts: ${findError.message}`);
+  }
+
+  if (!dueRows || dueRows.length === 0) {
+    return [];
+  }
+
+  const dueDrafts = dueRows as DraftRow[];
+
+  const ids = dueDrafts.map((draft) => draft.id);
+
+  const { data: publishedRows, error: publishError } = await supabase
+    .from("drafts")
+    .update({
+      status: "published",
+      published_at: now,
+    })
+    .in("id", ids)
+    .eq("status", "scheduled")
+    .select("*");
+
+  if (publishError) {
+    throw new Error(`Could not publish due drafts: ${publishError.message}`);
+  }
+
+  return (publishedRows as DraftRow[]).map(toDraft);
+}
