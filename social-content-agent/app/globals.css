@@ -69,7 +69,7 @@ h2 {
 
 .intro {
   max-width: 62ch;
-  margin: 14px 0 28px;
+  margin: 14px 0 14px;
   color: var(--muted-text);
   line-height: 1.6;
 }
@@ -176,4 +176,29 @@ button:disabled {
     align-items: flex-start;
     flex-direction: column;
   }
+}
+
+.secondary-button {
+  margin-left: 12px;
+  color: #3c4658;
+  background: #edf0f5;
+}
+
+.secondary-button:hover:not(:disabled) {
+  background: #dfe5ee;
+}
+
+@media (max-width: 600px) {
+  .secondary-button {
+    margin-left: 0;
+    margin-right: 12px;
+  }
+}
+.save-message {
+  margin: 12px 0 0;
+  color: #3c4658;
+  font-size: 0.9rem;
+}
+.brand-voice-button {
+  margin-bottom: 32px;
 }

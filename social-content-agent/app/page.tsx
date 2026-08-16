@@ -16,9 +16,11 @@ export default function App() {
   const [topic, setTopic] = useState("");
   const [draft, setDraft] = useState("");
   const [status, setStatus] = useState<PostStatus>("draft");
+  const [draftId, setDraftId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [brandVoiceName, setBrandVoiceName] = useState("");
   const [brandVoiceTone, setBrandVoiceTone] = useState<string[]>([]);
+  const [saveMessage, setSaveMessage] = useState("");
 
   async function loadBrandVoice() {
     const response = await fetch("/api/brand-voice");
@@ -57,7 +59,26 @@ export default function App() {
         throw new Error(data.error || "Could not generate a draft.");
       }
 
-      setDraft(data.draft);
+      const saveResponse = await fetch("/api/drafts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          topic: cleanTopic,
+          content: data.draft,
+        }),
+      });
+
+      const savedData = await saveResponse.json();
+
+      if (!saveResponse.ok) {
+        throw new Error(savedData.error || "Could not save the draft.");
+      }
+
+      setDraft(savedData.draft.content);
+      setDraftId(savedData.draft.id);
+      setStatus(savedData.draft.status);
     } catch (error) {
       const message =
         error instanceof Error
@@ -70,12 +91,91 @@ export default function App() {
     }
   }
 
-  function approveDraft() {
-    if (draft && !draft.startsWith("Please enter")) {
-      setStatus("approved");
+  async function approveDraft() {
+    if (!draftId) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/drafts/${draftId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "approved",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Could not approve the draft.");
+      }
+
+      setStatus(data.draft.status);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not approve the draft.";
+
+      setDraft(`Error: ${message}`);
     }
   }
 
+  async function saveDraftChanges() {
+    if (!draftId) {
+      setSaveMessage(
+        "This draft has not been saved yet. Generate a new draft first.",
+      );
+      return;
+    }
+
+    if (!draft.trim()) {
+      setSaveMessage("The draft is empty, so there is nothing to save.");
+      return;
+    }
+
+    setSaveMessage("Saving...");
+
+    try {
+      const response = await fetch(`/api/drafts/${draftId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: draft,
+        }),
+      });
+
+      const responseText = await response.text();
+
+      if (!responseText) {
+        throw new Error(
+          `The server returned an empty response (${response.status}).`,
+        );
+      }
+
+      const data = JSON.parse(responseText);
+
+      if (!response.ok || !data.draft?.content) {
+        throw new Error(
+          data.error ||
+            "Save failed: the server did not return the updated draft content.",
+        );
+      }
+
+      setDraft(data.draft.content);
+      setStatus(data.draft.status);
+      setSaveMessage("Changes saved.");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not save changes.";
+
+      console.error("Could not save draft:", error);
+      setSaveMessage(`Save failed: ${message}`);
+    }
+  }
   return (
     <main className="page">
       <section className="card">
@@ -86,7 +186,11 @@ export default function App() {
           it. Nothing is posted anywhere.
         </p>
 
-        <button type="button" onClick={loadBrandVoice}>
+        <button
+          type="button"
+          className="brand-voice-button"
+          onClick={loadBrandVoice}
+        >
           View active brand voice
         </button>
         {brandVoiceName && (
@@ -129,6 +233,16 @@ export default function App() {
               }}
               rows={12}
             />
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={saveDraftChanges}
+              disabled={!draftId}
+            >
+              Save changes
+            </button>
+
+            {saveMessage && <p className="save-message">{saveMessage}</p>}
 
             <button
               type="button"
