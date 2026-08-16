@@ -33,6 +33,7 @@ export const brandVoice = {
     "Include no more than three practical takeaways.",
     "Do not use more than five relevant hashtags.",
     "End with one thoughtful, open-ended question.",
+    "Don't use em dashes",
   ],
 
   accuracyRules: [

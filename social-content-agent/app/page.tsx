@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 type PostStatus = "draft" | "approved";
 
@@ -179,6 +180,10 @@ export default function App() {
   return (
     <main className="page">
       <section className="card">
+        <nav className="top-nav" aria-label="Primary navigation">
+          <Link href="/drafts">View saved drafts</Link>
+        </nav>
+
         <p className="eyebrow">Social Content Agent</p>
         <h1>Create a LinkedIn draft</h1>
         <p className="intro">

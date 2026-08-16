@@ -202,3 +202,169 @@ button:disabled {
 .brand-voice-button {
   margin-bottom: 32px;
 }
+.top-nav {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 28px;
+}
+
+.top-nav a {
+  color: var(--primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.top-nav a:hover {
+  text-decoration: underline;
+}
+.status-message {
+  margin: 28px 0 0;
+  color: var(--muted-text);
+}
+
+.error-message,
+.empty-state {
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.error-message {
+  color: #8a1c1c;
+  background: #fff0f0;
+  border-color: #f3b8b8;
+}
+
+.empty-state {
+  background: #f9fafc;
+}
+
+.empty-state p {
+  color: var(--muted-text);
+  line-height: 1.5;
+}
+
+.primary-link,
+.text-link {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.primary-link {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 12px 16px;
+  color: #ffffff;
+  background: var(--primary);
+  border-radius: 10px;
+}
+
+.primary-link:hover {
+  background: var(--primary-hover);
+  text-decoration: none;
+}
+
+.text-link:hover {
+  text-decoration: underline;
+}
+
+.draft-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.draft-list-item {
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.draft-list-heading,
+.draft-list-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.draft-topic {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.draft-preview {
+  display: -webkit-box;
+  margin: 14px 0;
+  overflow: hidden;
+  color: var(--muted-text);
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.draft-list-footer {
+  color: var(--muted-text);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+  .draft-list-heading,
+  .draft-list-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+.draft-topic-panel,
+.approval-note {
+  margin: 24px 0;
+  padding: 18px;
+  background: #f9fafc;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.draft-topic-panel h2,
+.approval-note h2 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.draft-topic-panel p,
+.approval-note p {
+  margin: 0;
+  color: var(--muted-text);
+  line-height: 1.55;
+}
+
+.approval-note {
+  color: #0a5b32;
+  background: #effbf4;
+  border-color: #bce9cf;
+}
+
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.editor-actions button {
+  margin-top: 0;
+}
+
+.editor-actions .secondary-button {
+  margin-left: 0;
+}
+
+.error-message-inline {
+  margin: 14px 0 0;
+  color: #8a1c1c;
+  line-height: 1.5;
+}
