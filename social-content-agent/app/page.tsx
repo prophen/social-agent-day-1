@@ -4,11 +4,29 @@ import { useState } from "react";
 
 type PostStatus = "draft" | "approved";
 
+type BrandVoice = {
+  name: string;
+  audience: string;
+  tone: readonly string[];
+  avoid: readonly string[];
+  formatRules: readonly string[];
+};
+
 export default function App() {
   const [topic, setTopic] = useState("");
   const [draft, setDraft] = useState("");
   const [status, setStatus] = useState<PostStatus>("draft");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [brandVoiceName, setBrandVoiceName] = useState("");
+  const [brandVoiceTone, setBrandVoiceTone] = useState<string[]>([]);
+
+  async function loadBrandVoice() {
+    const response = await fetch("/api/brand-voice");
+    const data: BrandVoice = await response.json();
+
+    setBrandVoiceName(data.name);
+    setBrandVoiceTone([...data.tone]);
+  }
 
   async function generateDraft() {
     const cleanTopic = topic.trim();
@@ -67,6 +85,21 @@ export default function App() {
           Enter a topic, generate a local practice draft, edit it, and approve
           it. Nothing is posted anywhere.
         </p>
+
+        <button type="button" onClick={loadBrandVoice}>
+          View active brand voice
+        </button>
+        {brandVoiceName && (
+          <section className="brand-voice-preview">
+            <h2>{brandVoiceName}</h2>
+            <p>Current tone guidelines:</p>
+            <ul>
+              {brandVoiceTone.map((tone) => (
+                <li key={tone}>{tone}</li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <label htmlFor="topic">What do you want to post about?</label>
         <textarea

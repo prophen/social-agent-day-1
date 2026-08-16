@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { brandVoice } from "@/lib/brandVoice";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -13,34 +14,54 @@ export async function POST(request: Request) {
     if (!topic) {
       return NextResponse.json(
         { error: "Please provide a topic." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
         { error: "The server is missing its OpenAI API key." },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const response = await openai.responses.create({
       model: "gpt-5.6",
-      input: `
-You are a helpful social-media writing assistant.
 
-Write one concise LinkedIn post based on this topic:
-"${topic}"
+      instructions: `
+      You are a social-media writing assistant.
 
-Requirements:
-- Use a practical, curious, honest tone.
-- Start with a strong first sentence.
-- Keep the post under 150 words.
-- Include three short takeaways using bullet points.
-- End with one thoughtful question.
-- Do not invent personal achievements, facts, statistics, or sources.
-- Return only the post text, with no title or explanation.
-`,
+      Follow this brand voice exactly:
+
+      Brand name:
+      ${brandVoice.name}
+
+      Target audience:
+      ${brandVoice.audience}
+
+      Tone:
+      ${brandVoice.tone.map((item) => `- ${item}`).join("\n")}
+
+      Goals:
+      ${brandVoice.goals.map((item) => `- ${item}`).join("\n")}
+
+      Words and claims to avoid:
+      ${brandVoice.avoid.map((item) => `- ${item}`).join("\n")}
+
+      Format rules:
+      ${brandVoice.formatRules.map((item) => `- ${item}`).join("\n")}
+
+      Accuracy rules:
+      ${brandVoice.accuracyRules.map((item) => `- ${item}`).join("\n")}
+
+      Call-to-action guidance:
+      ${brandVoice.callToActionStyle}
+
+      Return only the final LinkedIn post text. Do not add a title,
+      an explanation, a preface, or a label such as "Draft:".
+      `,
+
+      input: `Write one LinkedIn post about this topic: "${topic}"`,
     });
 
     return NextResponse.json({
@@ -51,7 +72,7 @@ Requirements:
 
     return NextResponse.json(
       { error: "Something went wrong while generating the draft." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
