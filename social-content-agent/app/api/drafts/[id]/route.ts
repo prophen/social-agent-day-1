@@ -38,16 +38,27 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     const content =
       typeof body.content === "string" ? body.content.trim() : undefined;
 
-    const status = body.status === "approved" ? "approved" : undefined;
+    const allowedStatuses = ["approved", "scheduled", "published"] as const;
+
+    const status = allowedStatuses.includes(body.status)
+      ? body.status
+      : undefined;
+
+    const scheduledFor =
+      typeof body.scheduledFor === "string" ? body.scheduledFor : undefined;
 
     if (!content && !status) {
       return NextResponse.json(
-        { error: "Provide draft content or an approval status." },
+        { error: "Provide draft content or a valid status update." },
         { status: 400 },
       );
     }
 
-    const draft = await updateDraft(id, { content, status });
+    const draft = await updateDraft(id, {
+      content,
+      status,
+      scheduledFor,
+    });
 
     if (!draft) {
       return NextResponse.json({ error: "Draft not found." }, { status: 404 });

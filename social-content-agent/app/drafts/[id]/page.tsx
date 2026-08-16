@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-type DraftStatus = "draft" | "approved";
+type DraftStatus = "draft" | "approved" | "scheduled" | "published";
 
 type Draft = {
   id: string;
@@ -14,6 +14,8 @@ type Draft = {
   createdAt: string;
   updatedAt: string;
   approvedAt: string | null;
+  scheduledFor: string | null;
+  publishedAt: string | null;
 };
 
 function formatDate(value: string) {
@@ -33,6 +35,8 @@ export default function DraftEditorPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [message, setMessage] = useState("");
+  const [scheduledFor, setScheduledFor] = useState("");
+  const [isScheduling, setIsScheduling] = useState(false);
 
   async function readResponse(response: Response) {
     const text = await response.text();
@@ -52,32 +56,47 @@ export default function DraftEditorPage() {
     }
   }
 
-  async function loadDraft() {
-    setIsLoading(true);
-    setMessage("");
-
-    try {
-      const response = await fetch(`/api/drafts/${draftId}`);
-      const data = await readResponse(response);
-
-      if (!response.ok || !data.draft) {
-        throw new Error(data.error || "Could not load this draft.");
-      }
-
-      setDraft(data.draft);
-      setContent(data.draft.content);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Could not load this draft.";
-
-      setMessage(`Error: ${errorMessage}`);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   useEffect(() => {
-    void loadDraft();
+    let ignore = false;
+
+    async function fetchDraft() {
+      try {
+        const response = await fetch(`/api/drafts/${draftId}`);
+        const data = await readResponse(response);
+
+        if (!response.ok || !data.draft) {
+          throw new Error(data.error || "Could not load this draft.");
+        }
+
+        if (!ignore) {
+          setDraft(data.draft);
+          setContent(data.draft.content);
+
+          setScheduledFor(
+            data.draft.scheduledFor
+              ? new Date(data.draft.scheduledFor).toISOString().slice(0, 16)
+              : "",
+          );
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Could not load this draft.";
+
+        if (!ignore) {
+          setMessage(`Error: ${errorMessage}`);
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void fetchDraft();
+
+    return () => {
+      ignore = true;
+    };
   }, [draftId]);
 
   function handleContentChange(nextContent: string) {
@@ -204,7 +223,54 @@ export default function DraftEditorPage() {
       </main>
     );
   }
+  async function scheduleDraft() {
+    if (!draft) {
+      return;
+    }
 
+    if (!scheduledFor) {
+      setMessage("Choose a future date and time first.");
+      return;
+    }
+
+    setIsScheduling(true);
+    setMessage("Scheduling draft...");
+
+    try {
+      const response = await fetch(`/api/drafts/${draft.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "scheduled",
+          scheduledFor: new Date(scheduledFor).toISOString(),
+        }),
+      });
+
+      const data = await readResponse(response);
+
+      if (!response.ok || !data.draft) {
+        throw new Error(data.error || "Could not schedule this draft.");
+      }
+
+      setDraft(data.draft);
+      setContent(data.draft.content);
+      setScheduledFor(
+        new Date(data.draft.scheduledFor).toISOString().slice(0, 16),
+      );
+      setMessage("Draft scheduled.");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Could not schedule this draft.";
+
+      setMessage(`Scheduling failed: ${errorMessage}`);
+    } finally {
+      setIsScheduling(false);
+    }
+  }
   return (
     <main className="page">
       <section className="card">
@@ -261,6 +327,38 @@ export default function DraftEditorPage() {
                 ? "Approving..."
                 : "Approve draft"}
           </button>
+          {draft.status === "approved" && (
+            <section className="schedule-panel">
+              <h2>Schedule simulated publication</h2>
+
+              <label htmlFor="scheduled-for">Publish date and time</label>
+
+              <input
+                id="scheduled-for"
+                type="datetime-local"
+                value={scheduledFor}
+                onChange={(event) => setScheduledFor(event.target.value)}
+              />
+
+              <button
+                type="button"
+                className="schedule-button"
+                onClick={scheduleDraft}
+                disabled={isScheduling}
+              >
+                {isScheduling ? "Scheduling..." : "Schedule post"}
+              </button>
+            </section>
+          )}
+          {draft.status === "scheduled" && draft.scheduledFor && (
+            <section className="schedule-panel">
+              <h2>Scheduled</h2>
+              <p>
+                Simulated publication is scheduled for{" "}
+                {formatDate(draft.scheduledFor)}.
+              </p>
+            </section>
+          )}
         </div>
 
         {message && (

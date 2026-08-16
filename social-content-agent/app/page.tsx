@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-type PostStatus = "draft" | "approved";
+type PostStatus = "draft" | "approved" | "scheduled" | "published";
 
 type BrandVoice = {
   name: string;

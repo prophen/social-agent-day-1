@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-type DraftStatus = "draft" | "approved";
+export type DraftStatus = "draft" | "approved" | "scheduled" | "published";
 
 type Draft = {
   id: string;
@@ -61,7 +61,39 @@ export default function DraftLibraryPage() {
   }
 
   useEffect(() => {
-    void loadDrafts();
+    let ignore = false;
+
+    async function fetchDrafts() {
+      try {
+        const response = await fetch("/api/drafts");
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Could not load drafts.");
+        }
+
+        if (!ignore) {
+          setDrafts(data.drafts);
+        }
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Could not load drafts.";
+
+        if (!ignore) {
+          setError(message);
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void fetchDrafts();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   return (

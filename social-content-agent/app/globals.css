@@ -368,3 +368,41 @@ button:disabled {
   color: #8a1c1c;
   line-height: 1.5;
 }
+.schedule-panel {
+  margin-top: 24px;
+  padding: 20px;
+  background: #eef4ff;
+  border: 1px solid #bfd1f5;
+  border-radius: 12px;
+}
+
+.schedule-panel h2 {
+  margin: 0 0 14px;
+  font-size: 1rem;
+}
+
+.schedule-panel p {
+  margin: 0;
+  color: var(--muted-text);
+  line-height: 1.5;
+}
+
+.schedule-panel input {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 8px;
+  padding: 11px 12px;
+  color: var(--text);
+  background: #ffffff;
+  border: 1px solid #aebfdc;
+  border-radius: 10px;
+}
+
+.schedule-button {
+  background: #1e5bb8;
+}
+
+.schedule-button:hover:not(:disabled) {
+  background: #17488f;
+}
